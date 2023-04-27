@@ -20,10 +20,20 @@ class ViewController: UITableViewController {
     }
 
     @IBAction func exJust1() {
-        Observable.just("Hello World")
-            .subscribe(onNext: { str in
-                print(str)
-            })
+        Observable.just(["RxSwift", "In", "4", "Hours"])
+            .subscribe { event in
+                switch event {
+                case .next(let str):
+                    print("next : \(str)")
+                    break
+                case .error(let err):
+                    print("error : \(err.localizedDescription)")
+                    break
+                case .completed:
+                    print("complete")
+                    break
+                }
+            }
             .disposed(by: disposeBag)
     }
 
@@ -47,7 +57,7 @@ class ViewController: UITableViewController {
         Observable.just("Hello")
             .map { str in "\(str) RxSwift" }
             .subscribe(onNext: { str in
-                print(str)
+                print(str) // Hello RxSwift
             })
             .disposed(by: disposeBag)
     }
@@ -56,7 +66,7 @@ class ViewController: UITableViewController {
         Observable.from(["with", "곰튀김"])
             .map { $0.count }
             .subscribe(onNext: { str in
-                print(str)
+                print(str) // 4, 3
             })
             .disposed(by: disposeBag)
     }
@@ -79,8 +89,10 @@ class ViewController: UITableViewController {
             .map { $0! }
             .map { try Data(contentsOf: $0) }
             .map { UIImage(data: $0) }
+            .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .default))
+            .observeOn(MainScheduler.instance)
             .subscribe(onNext: { image in
-                self.imageView.image = image
+                self.imageView.image = image // side effect
             })
             .disposed(by: disposeBag)
     }
