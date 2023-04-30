@@ -34,6 +34,32 @@ class ViewController: UIViewController {
         //          +--> button enable
         //          |
         // pw input +--> check valid --> bullet
+//        .filter { $0 != nil }
+//        .map { $0! }
+        idField.rx.text.orEmpty 
+            .map(checkEmailValid)
+            .subscribe { bool in
+                self.idValidView.isHidden = bool
+            }
+            .disposed(by: disposeBag)
+        
+        pwField.rx.text.orEmpty
+            .map(checkPasswordValid)
+            .subscribe { bool in
+                self.pwValidView.isHidden = bool
+            }
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            idField.rx.text.orEmpty.map(checkEmailValid),
+            pwField.rx.text.orEmpty.map(checkPasswordValid)) { id, pwd in
+            id && pwd
+            }
+            .subscribe { bool in
+                self.loginButton.isEnabled = bool
+            }
+            .disposed(by: disposeBag)
+        
     }
 
     // MARK: - Logic
